@@ -12,12 +12,12 @@ import (
 	"go.uber.org/zap"
 )
 
-type Repository struct {
-	store  domain.Customerstore
+type CustomerHandler struct {
+	repo   domain.Repository
 	Logger *zap.Logger
 }
 
-func (ctl Repository) Post(w http.ResponseWriter, r *http.Request) {
+func (ctl CustomerHandler) Post(w http.ResponseWriter, r *http.Request) {
 	defer ctl.Logger.Sync()
 	var customer domain.Customer
 	fmt.Println("Request here")
@@ -30,7 +30,7 @@ func (ctl Repository) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Create Customer
-	if err := ctl.store.Create(customer); err != nil {
+	if err := ctl.repo.Create(customer); err != nil {
 		ctl.Logger.Error(err.Error(),
 			zap.String("url", r.URL.String()),
 		)
@@ -47,13 +47,13 @@ func (ctl Repository) Post(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (ctrl Repository) Get(w http.ResponseWriter, r *http.Request) {
+func (ctrl CustomerHandler) Get(w http.ResponseWriter, r *http.Request) {
 	defer ctrl.Logger.Sync()
 	vars := mux.Vars(r)
 	fmt.Println("vars", vars)
 	id := vars["custid"]
 
-	if customer, err := ctrl.store.GetById(id); err != nil {
+	if customer, err := ctrl.repo.GetById(id); err != nil {
 		ctrl.Logger.Error(err.Error(),
 			zap.String("cust id", id),
 			zap.String("url", r.URL.String()),
@@ -77,12 +77,12 @@ func (ctrl Repository) Get(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
-func (ctrl Repository) Delete(w http.ResponseWriter, r *http.Request) {
+func (ctrl CustomerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	defer ctrl.Logger.Sync()
 	vars := mux.Vars(r)
 	custId := vars["custid"]
 
-	if err := ctrl.store.Delete(custId); err != nil {
+	if err := ctrl.repo.Delete(custId); err != nil {
 		ctrl.Logger.Error(err.Error(),
 			zap.String("customer id", custId),
 			zap.String("url", r.URL.String()),
@@ -96,7 +96,7 @@ func (ctrl Repository) Delete(w http.ResponseWriter, r *http.Request) {
 	)
 	w.WriteHeader(http.StatusNoContent)
 }
-func (ctrl Repository) Put(w http.ResponseWriter, r *http.Request) {
+func (ctrl CustomerHandler) Put(w http.ResponseWriter, r *http.Request) {
 	defer ctrl.Logger.Sync()
 	vars := mux.Vars(r)
 	custid := vars["custid"]
@@ -112,7 +112,7 @@ func (ctrl Repository) Put(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update
-	if err := ctrl.store.Update(custid, customer); err != nil {
+	if err := ctrl.repo.Update(custid, customer); err != nil {
 		ctrl.Logger.Error(err.Error(),
 			zap.String("Customer id", custid),
 			zap.String("URL", r.URL.String()),
@@ -126,8 +126,8 @@ func (ctrl Repository) Put(w http.ResponseWriter, r *http.Request) {
 	)
 	w.WriteHeader(http.StatusNoContent)
 }
-func (ctrl Repository) GetAll(w http.ResponseWriter, r *http.Request) {
-	if customers, err := ctrl.store.GetAll(); err != nil {
+func (ctrl CustomerHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	if customers, err := ctrl.repo.GetAll(); err != nil {
 		ctrl.Logger.Error(err.Error(),
 			zap.String("url", r.URL.String()),
 		)

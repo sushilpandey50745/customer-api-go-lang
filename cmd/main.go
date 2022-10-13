@@ -13,12 +13,12 @@ import (
 func main() {
 	fmt.Println("Welcome to Customer App RestAPI")
 	logger, _ := zap.NewProduction()
-	repo, err := mapstore.NewMapStore()
+	inmemrepo, err := mapstore.NewMapStore()
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
-	h := &Repository{
-		store:  repo,
+	h := &CustomerHandler{
+		repo:   inmemrepo,
 		Logger: logger,
 	}
 	router := initializeRoutes(h)
@@ -31,7 +31,7 @@ func main() {
 
 }
 
-func initializeRoutes(h *Repository) *mux.Router {
+func initializeRoutes(h *CustomerHandler) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/customer", h.GetAll).Methods("GET")
 	r.HandleFunc("/api/customer/{custid}", h.Get).Methods("GET")
