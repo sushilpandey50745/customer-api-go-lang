@@ -12,7 +12,7 @@ type Customer struct {
 	Email      string `json:"email"`
 }
 
-type Customerstore interface {
+type Repository interface {
 	Create(Customer) error
 	Update(string, Customer) error
 	Delete(string) error
